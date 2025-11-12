@@ -5,6 +5,7 @@ writer : writer.o
 writer.o : writer.c
 	gcc -c writer.c
 
+# -f : won't give error if no file exists
 clean :
-	rm writer writer.o
+	rm -f writer *.o
 
