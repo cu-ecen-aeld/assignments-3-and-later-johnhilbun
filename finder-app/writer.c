@@ -19,8 +19,8 @@ int main (int argc, char** argv) {
    openlog(NULL, LOG_CONS | LOG_PERROR, LOG_USER);
 
    // Say what we are going to do
-   printf ("writing %s to %s\n", argv[2], argv[1]); // JDH remove
-   syslog(LOG_DEBUG, "writing %s in file %s", argv[2], argv[1]);
+   // printf ("writing %s to %s\n", argv[2], argv[1]); 
+   syslog(LOG_DEBUG, "writing %s to %s", argv[2], argv[1]);
 
    // Create/open argv[1] in write mode
    fp = fopen(argv[1], "w");
