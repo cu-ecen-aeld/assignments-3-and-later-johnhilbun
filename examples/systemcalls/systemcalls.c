@@ -1,4 +1,10 @@
 #include "systemcalls.h"
+#include "stdlib.h"		// JDH for system()
+#include <sys/types.h>		// JDH man fork includes this
+#include <unistd.h>		// JDH man fork includes this
+#include <sys/types.h>		// JDH man waitp includes this
+#include <sys/wait.h>		// JDH man waipt includes this
+
 
 /**
  * @param cmd the command to execute with system()
@@ -16,6 +22,33 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
+    // JDH begin
+    int result = 0;
+
+    result = system(cmd);
+    if (cmd == NULL)
+    {
+        // printf("cmd is NULL, so I think return true, but is that correct?");
+	return true;
+    }
+    else if (result == -1) 
+    {
+        // printf("system() failed : returned %d", result);
+        return false;
+    }
+    else if (result == 2)
+    {
+        // printf("system() could not execute shell. How to see if status is 127?");
+	// call wait-pid(2)?
+	return false;
+    }
+    else
+    {
+        // printf("system() succeeded. termination of child shell is ___?");
+	// call wait-pid(2)?
+	return true;
+    }
+    // JDH end
 
     return true;
 }
@@ -58,6 +91,51 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+    // JDH begin : from Linux System Programming page 161
+    {
+        int status;
+	pid_t pid;
+
+	// JDH Debug
+	//for (int i=0; i<count; i++)
+	//    printf("\n### command: %s###\n",command[i]);
+
+	pid = fork();
+	if (pid == -1)
+	{
+	    //printf("###Parent### do_exec() fork() was -1 : will return false ###\n");
+	    return false;
+	}
+	else if (pid == 0)	// this is the child
+	{
+	    //printf("###Child### do_exec() will run %s", command[0]);
+
+	    execv (command[0], command); // should not return if it worked?
+
+	    //printf("###Child### do_exec() execv() failed : return false###\n");
+	    exit(-1); // execv() failed, clean up the fork()
+	}
+
+	if (waitpid (pid, &status, 0) == -1)
+	{
+	    //printf("###Parent### do_exec() will return false ###\n");
+	    return false;
+	}
+
+	// Check if child exited successfully
+	if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
+	{
+	    //printf("###Parent### do_exec() will return true ###\n");
+	    return true;
+	}
+	else
+	{
+	    //printf("###Parent### do_exec() will return false ###\n");
+	    return false;
+	}
+	
+    }
+    // JDH end
 
     va_end(args);
 
@@ -92,8 +170,15 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    // JDH begin
+    bool result;
+
+    // JDH need to redirect output
+    result = do_exec(count, command);	// JDH I think this is what it means "rest of behavior is same as ..."
+    // JDH end
 
     va_end(args);
 
-    return true;
+    // JDH original : return true;
+    return result;
 }
