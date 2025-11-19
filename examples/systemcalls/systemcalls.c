@@ -4,6 +4,7 @@
 #include <unistd.h>		// JDH man fork includes this
 #include <sys/types.h>		// JDH man waitp includes this
 #include <sys/wait.h>		// JDH man waipt includes this
+#include <fcntl.h>		// JDH for file redirection 
 
 
 /**
@@ -22,7 +23,6 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
-    // JDH begin
     int result = 0;
 
     result = system(cmd);
@@ -48,7 +48,6 @@ bool do_system(const char *cmd)
 	// call wait-pid(2)?
 	return true;
     }
-    // JDH end
 
     return true;
 }
@@ -91,14 +90,13 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-    // JDH begin : from Linux System Programming page 161
+    // from Linux System Programming page 161
     {
         int status;
 	pid_t pid;
 
-	// JDH Debug
 	//for (int i=0; i<count; i++)
-	//    printf("\n### command: %s###\n",command[i]);
+	//    printf("\n### do_exec() command: %s###\n",command[i]);
 
 	pid = fork();
 	if (pid == -1)
@@ -135,7 +133,6 @@ bool do_exec(int count, ...)
 	}
 	
     }
-    // JDH end
 
     va_end(args);
 
@@ -153,6 +150,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     va_start(args, count);
     char * command[count+1];
     int i;
+    va_list args_copy;
+    va_copy(args_copy, args);
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
@@ -170,15 +169,60 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
-    // JDH begin
-    bool result;
+// JDH begin : from Linux System Programming page 161
+    {
+        int status;
+        pid_t pid;
 
-    // JDH need to redirect output
-    result = do_exec(count, command);	// JDH I think this is what it means "rest of behavior is same as ..."
-    // JDH end
+        //for (int i=0; i<count; i++)
+        //    printf("\n### do_exec_redirect() command: %s###\n",command[i]);
+
+	// next two lines are for redirection
+	int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+	if (fd < 0) {perror("open"); abort(); }
+
+        pid = fork();
+        if (pid == -1)
+        {
+            //printf("###Parent### do_exec_redirect() fork() was -1 : will return false ###\n");
+            return false;
+        }
+        else if (pid == 0)      // this is the child
+        {
+	    // JDH redirection - begin
+	    if (dup2(fd, 1) < 0) { perror("fork()"); abort();}
+	    close(fd);
+	    // JDH redirection - end
+            //printf("###Child### do_exec_redirect() will run %s", command[0]);
+
+            execv (command[0], command); // should not return if it worked?
+
+            //printf("###Child### do_exec_redirect() execv() failed : return false###\n");
+            exit(-1); // execv() failed, clean up the fork()
+        }
+	close(fd);// JDH redirection
+
+	if (waitpid (pid, &status, 0) == -1)
+        {
+            //printf("###Parent### do_exec_redirect() will return false ###\n");
+            return false;
+        }
+
+        // Check if child exited successfully
+        if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
+        {
+            //printf("###Parent### do_exec_redirect() will return true ###\n");
+            return true;
+        }
+        else
+        {
+            //printf("###Parent### do_exec_redirect() will return false ###\n");
+            return false;
+        }
+
+    }
 
     va_end(args);
 
     // JDH original : return true;
-    return result;
 }
