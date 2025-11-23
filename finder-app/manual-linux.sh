@@ -115,6 +115,8 @@ fi
 #echo "JDH 08 pwd is $(pwd)" # JDH debu
 cd "$OUTDIR"/rootfs	# JDH but why does ..else.. above cd to busybox?
 #echo "JDH 09 pwd is $(pwd)" # JDH debu
+sudo chown root:root ${OUTDIR}/busybox/busybox	# JDH SUN : cp ld-linux-aarch64.so.1 no such file or directory ?
+sudo chmod u+x ${OUTDIR}/busybox/busybox	# JDH SUN : cp - no such file or directory
 
 echo "Library dependencies"
 ${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
@@ -160,7 +162,8 @@ cp autorun-qemu.sh ${OUTDIR}/rootfs/home		# JDH not in this TODO but mentioned i
 # TODO: Chown the root directory
 #echo "## Chown the root directory ###" # JDH added
 sudo chown root:root ${OUTDIR}/rootfs	# JDH let's try this
-#sudo chown root:root ${OUTDIR}/rootfs/dev # JDH SUN : to address 'cant access tty' boot error?
+sudo chown root:root ${OUTDIR}/busybox	# JDH SUN : cp ld-linux-aarch64.so.1 no such file or directory : try this
+sudo chmod u+x ${OUTDIR}/busybox	# JDH SUN : cp - no such file or directory
 
 # TODO: Create initramfs.cpio.gz
 #echo "## Create initramfs.cpio.gz  ###" # JDH added
