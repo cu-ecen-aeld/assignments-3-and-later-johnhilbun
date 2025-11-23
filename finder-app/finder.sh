@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/sh
 # JDH SUN : original line above is <she><bang>/bin/bash
 # JDH created
 
