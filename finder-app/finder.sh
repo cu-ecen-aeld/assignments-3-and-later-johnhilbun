@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/ash
+# JDH SUN : original line above is <she><bang>/bin/bash
 # JDH created
 
 #echo "Let the weekend begin!"
