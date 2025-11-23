@@ -115,8 +115,8 @@ fi
 #echo "JDH 08 pwd is $(pwd)" # JDH debu
 cd "$OUTDIR"/rootfs	# JDH but why does ..else.. above cd to busybox?
 #echo "JDH 09 pwd is $(pwd)" # JDH debu
-sudo chown root:root ${OUTDIR}/rootfs/bin/busybox # JDH SUN : cp ld-linux-aarch64.so.1 no such file or directory ?
-sudo chmod u+x ${OUTDIR}/rootfs/bin/busybox	# JDH SUN : cp - no such file or directory
+# JDH SUN riff raff : sudo chown root:root ${OUTDIR}/rootfs/bin/busybox # JDH SUN : cp ld-linux-aarch64.so.1 no such file or directory ?
+# JDH SUN riff raff : sudo chmod u+x ${OUTDIR}/rootfs/bin/busybox	# JDH SUN : cp - no such file or directory
 
 echo "Library dependencies"
 ${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
@@ -124,7 +124,8 @@ ${CROSS_COMPILE}readelf -a bin/busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
 # JDH begin add 
-# JDH SUN added sudo to the copy - in Runner, getting 'cannot stat cp' no such file
+# JDH SUN added sudo to the copy - in Runner, getting 'cannot stat cp' no such file : no help
+#  JDH SUN added -a : for the Runner error
 sudo cp /home/buffalo/arm-cross-compiler/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/../aarch64-none-linux-gnu/libc/lib/ld-linux-aarch64.so.1 lib
 
 cp /home/buffalo/arm-cross-compiler/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/../aarch64-none-linux-gnu/libc/lib64/libm.so.6 lib64
@@ -162,8 +163,8 @@ cp autorun-qemu.sh ${OUTDIR}/rootfs/home		# JDH not in this TODO but mentioned i
 # TODO: Chown the root directory
 #echo "## Chown the root directory ###" # JDH added
 sudo chown root:root ${OUTDIR}/rootfs	# JDH let's try this
-sudo chown root:root ${OUTDIR}/busybox	# JDH SUN : cp ld-linux-aarch64.so.1 no such file or directory : try this
-sudo chmod u+x ${OUTDIR}/busybox	# JDH SUN : cp - no such file or directory
+# JDH SUN riff raff : sudo chown root:root ${OUTDIR}/busybox/busybox	# JDH SUN : cp ld-linux-aarch64.so.1 no such file or directory : try this
+# JDH SUN riff raff : sudo chmod u+x ${OUTDIR}/busybox/busybox	# JDH SUN : cp - no such file or directory
 
 # TODO: Create initramfs.cpio.gz
 #echo "## Create initramfs.cpio.gz  ###" # JDH added
