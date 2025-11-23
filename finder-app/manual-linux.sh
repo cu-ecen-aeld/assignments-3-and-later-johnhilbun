@@ -115,8 +115,8 @@ fi
 #echo "JDH 08 pwd is $(pwd)" # JDH debu
 cd "$OUTDIR"/rootfs	# JDH but why does ..else.. above cd to busybox?
 #echo "JDH 09 pwd is $(pwd)" # JDH debu
-sudo chown root:root ${OUTDIR}/busybox/busybox	# JDH SUN : cp ld-linux-aarch64.so.1 no such file or directory ?
-sudo chmod u+x ${OUTDIR}/busybox/busybox	# JDH SUN : cp - no such file or directory
+sudo chown root:root ${OUTDIR}/rootfs/bin/busybox # JDH SUN : cp ld-linux-aarch64.so.1 no such file or directory ?
+sudo chmod u+x ${OUTDIR}/rootfs/bin/busybox	# JDH SUN : cp - no such file or directory
 
 echo "Library dependencies"
 ${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
