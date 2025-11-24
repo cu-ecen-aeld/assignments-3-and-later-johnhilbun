@@ -1,0 +1,18 @@
+# .github/workflows/check-runner.yml
+name: Check Runner Access
+
+on:
+   workflow_dispatch:
+
+jobs:
+  check-access:
+    runs-on: self-hosted
+    steps:
+      -name: Show current user
+        run: whoami
+      -name: Sow user id and groups
+        run: id
+      -name: Show working directory
+        run: pwd
+      -name: List files in workspace
+        run: ls -al
