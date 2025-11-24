@@ -141,7 +141,8 @@ cp ${SYSROOT}/lib64/libm.so.6 lib64 # JDH MON
 # JDH SUN night : huh? it's .2 ...
 # JDH SUN night : cp /home/buffalo/arm-cross-compiler/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/../aarch64-none-linux-gnu/libc/lib64/libresolv.so.2 lib64
 # JDH SUN night : but this comes from a different installed package : sudo apt install libc6-arm64-cross
-cp /usr/aarch64-linux-gnu/lib/libresolv.so.2 lib64
+# JDH MON : cp /usr/aarch64-linux-gnu/lib/libresolv.so.2 lib64 # JDH MON : this is disk location - reinstall?
+cp ${SYSROOT}/lib64/libresolv.so.2 lib64 # JDH MON : this is disk location - reinstall?
 
 # JDH SUN night : cp /home/buffalo/arm-cross-compiler/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/../aarch64-none-linux-gnu/libc/lib64/libc.so.6 lib64
 # JDH MON cp /opt/aarch64-cross-compiler/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/lib64/libc.so.6 lib64
