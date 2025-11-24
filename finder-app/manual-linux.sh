@@ -169,6 +169,7 @@ sudo chown root:root ${OUTDIR}/rootfs	# JDH let's try this
 # TODO: Create initramfs.cpio.gz
 #echo "## Create initramfs.cpio.gz  ###" # JDH added
 cd "${OUTDIR}/rootfs"	# JDH from slide
+sudo chown -R root:root .  # JDH SUN night : let's set them all to root and see...
 find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio # JDH from slide
 # JDH SUN test : sudo find . | cpio -H newc -ov --owner root:root > ${OUTDIR}/initramfs.cpio # JDH SUN add 'sudo'
 #echo "## gzip ###" # JDH added
