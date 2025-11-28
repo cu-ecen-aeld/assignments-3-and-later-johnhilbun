@@ -38,7 +38,8 @@ void* threadfunc(void* thread_param)
     printf("threadfunc() usleep1(%u) after : usleep_rc : %d\n",wait_value, usleep_rc);
 
     // obtain the mutex
-    rc = pthread_mutex_lock(thread_func_args->m_mutex);
+    // JDH THU original rc = pthread_mutex_lock(thread_func_args->m_mutex);
+    rc = pthread_mutex_lock(thread_func_args->m_mutex); // JDH THU use the address
     printf("threadfunc(): immediately after pthread_mutex_lock()\n");
     if (rc != 0)
     {
@@ -56,7 +57,8 @@ void* threadfunc(void* thread_param)
     printf("threadfunc() usleep2(%u) after : usleep_rc : %d\n",wait_value, usleep_rc);
 
     // now unlock the mutex
-    rc = pthread_mutex_unlock(thread_func_args->m_mutex);
+    // JDH THU original rc = pthread_mutex_unlock(thread_func_args->m_mutex);
+    rc = pthread_mutex_unlock(thread_func_args->m_mutex); // JDH THU use the address of the mutex
     if (rc != 0)
     {
        printf("threadfunc() failed to unlock rc:%d\n",rc);
@@ -90,6 +92,7 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
     my_thread_data->m_wait_to_obtain_ms = wait_to_obtain_ms;
     my_thread_data->m_wait_to_release_ms = wait_to_release_ms;
     my_thread_data->thread_complete_success = false; // let's initialize to false
+    my_thread_data->m_mutex = mutex; // JDH THU added : move the mutex function arg to the threads data struct
     //printf("$$$ arg: wait_to_obtain_ms %d\n", wait_to_obtain_ms);
     //printf("$$$ arg: wait_to_release_ms %d\n", wait_to_release_ms);
     //printf("$$$ value: thread_complete_success %d\n", my_thread_data->thread_complete_success);
@@ -98,16 +101,18 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
     //printf("$$$ my_thread_data : thread_complete_success %d\n", my_thread_data->thread_complete_success);
 
     printf("start_thread_obtaining_mutex() enter\n");
+    // JDH THU - fake line - *mutex = m_united_mutex; // JDH THU - satisfy compiler - variable not used error
 
     // create a mutex
-    rc = pthread_mutex_init(mutex, NULL);
+    /* JDH THU : rc = pthread_mutex_init(mutex, NULL);
     if (rc !=0)
     {
         printf("start_thread_obtaining_mutex() pthread_mutex_init() rc:%d\n",rc);
 	return false;
     }
+    */
     // JDH WED : save the mutex even though it was passed in as an arg to this function
-    my_thread_data->m_mutex = mutex;
+    // JDH THU original : my_thread_data->m_mutex = mutex;
 
     // call the thread function
     // JDH stack related issues? rc = pthread_create(thread, NULL, threadfunc, &my_thread_data);
