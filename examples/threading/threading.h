@@ -19,12 +19,11 @@ struct thread_data{
      * Set to true if the thread completed with success, false
      * if an error occurred.
      */
-    bool thread_complete_success;
+    bool thread_complete_success; // JDH provided.
     int m_wait_to_obtain_ms;	// JDH added
     int m_wait_to_release_ms;	// JDH added
-    pthread_t *m_thread;	// JDH added : maybe this is to make sure the mutex is for the right thread. Try using it somehow.
-    pthread_mutex_t *m_mutex;	// JDH THU PTHREAD_MUTEX_INITIALIZER : this is handled by ...init(). But... We receive a mutex argument, so assume someone else has already intialized it. JDH PROVE : look for ...init() in test code
-    // JDH THU : moving back to a ptr since we receive the mutex as an arg : pthread_mutex_t m_mutex;	// JDH THU : make it the structure, not a pointer to the structure
+    pthread_t *m_thread;	// JDH added : this is to make sure the mutex is for the right thread?
+    pthread_mutex_t *m_mutex;	// We receive a mutex argument, so someone else has already intialized it (seen in the calling test code)
 };
 
 
