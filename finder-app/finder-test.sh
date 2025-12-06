@@ -66,6 +66,9 @@ done
 # JDH QEMU original : OUTPUTSTRING=$(/bin/sh ./finder.sh "$WRITEDIR" "$WRITESTR") # JDH SUN : added /bin/sh
 OUTPUTSTRING=$(/bin/sh /usr/bin/finder.sh "$WRITEDIR" "$WRITESTR") # JDH SUN : added /bin/sh
 
+# JDH QEMU : Assignment 4 Part 2 addition
+echo "$OUTPUTSTRING" > /tmp/assignment4-result.txt
+
 # remove temporary directories
 rm -rf /tmp/aeld-data
 
