@@ -7,6 +7,7 @@
 #include <netdb.h>	// getaddrinfo
 #include <string.h>	// memset
 #include <arpa/inet.h>	// inet_ntop
+#include <sys/stat.h>	// umask
 
 // make a loop variable that is robust
 volatile sig_atomic_t keep_listening = 1;
@@ -45,11 +46,42 @@ void signal_handler(int the_signal)
       fclose(outfile_reading);
 }
 
+void make_daemon(void)
+{
+   pid_t pid = fork();
+   if (pid < 0)
+      exit(EXIT_FAILURE);
+   if (pid > 0)
+      exit(EXIT_SUCCESS); // parent
+
+   if (setsid() < 0)
+      exit(EXIT_FAILURE);
+
+   pid = fork();
+   if (pid < 0)
+      exit(EXIT_FAILURE);
+   if (pid > 0)
+      exit(EXIT_SUCCESS); // parent
+
+   // similar to 'leave no trace' hiking
+   umask(0);
+   chdir("/");
+   close(STDIN_FILENO);
+   close(STDOUT_FILENO);
+   close(STDERR_FILENO);
+}
+
 // aesdsocket 
 int main (int argc, char** argv)
 {
-   printf("Hello ECEA 5305!\n");
-   syslog(LOG_INFO, "Welcome to the jungle");	// JDH make this something real
+   int run_as_daemon = 0;
+
+   printf("ECEA 5305\n");
+   syslog(LOG_INFO, "ECEA 5305");	// JDH feedback 
+
+   for (int i=1; i<argc; i++)
+      if (strcmp(argv[i], "-d") == 0)
+         run_as_daemon = 1;
 
    // setup termination conditions
    //signal(SIGINT, signal_handler);
@@ -95,6 +127,10 @@ int main (int argc, char** argv)
       freeaddrinfo(servinfo);
       exit (1); // JDH exit (-1 instead?)
    }
+
+   // we could bind, so now potentially run as daemon
+   if (run_as_daemon)
+      make_daemon(); // JDH make sure we don't "double connect" on 9000
 
    // open a file, truncating if it exists
    FILE *outfile_writing;   // /var/tmp/aesdsocketdata
