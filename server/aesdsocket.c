@@ -11,7 +11,8 @@
 // make a loop variable that is robust
 volatile sig_atomic_t keep_listening = 1;
 
-#define BUFFER_SIZE 1024	// JDH pulled from a hat, keep an eye on this
+//#define BUFFER_SIZE 1024	// JDH pulled from a hat, keep an eye on this
+#define BUFFER_SIZE 20480	// JDH long_string is 19,999 on disk : try it
 int server_socket_fd;		// JDH made global - signal handler involved
 int client_socket_fd;		// JDH made global - signal handler involved
 FILE *outfile_writing = NULL;		// /var/tmp/aesdsocketdata
