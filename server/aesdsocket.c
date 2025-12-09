@@ -118,6 +118,7 @@ int main (int argc, char** argv)
       freeaddrinfo(servinfo);
       exit (1); // JDH exit (-1 instead?)
    }
+   syslog(LOG_INFO,"+++ socket() success +++");
 
    // bind
    if (bind (server_socket_fd, servinfo->ai_addr, servinfo->ai_addrlen) == -1)
@@ -127,10 +128,14 @@ int main (int argc, char** argv)
       freeaddrinfo(servinfo);
       exit (1); // JDH exit (-1 instead?)
    }
+   syslog(LOG_INFO,"+++ bind() success +++");
 
    // we could bind, so now potentially run as daemon
-   if (run_as_daemon)
+   if (run_as_daemon) {
+      printf ("\n+++ before make_daemon() +++\n");
       make_daemon(); // JDH make sure we don't "double connect" on 9000
+      printf ("\n+++ after make_daemon() +++\n");
+   }
 
    // open a file, truncating if it exists
    FILE *outfile_writing;   // /var/tmp/aesdsocketdata
@@ -138,11 +143,13 @@ int main (int argc, char** argv)
    outfile_writing = fopen ("/var/tmp/aesdsocketdata", "w"); // w : truncate if it exists
    if (!outfile_writing)
    {
+      syslog(LOG_INFO,"+++ outfile_writing error +++");
       perror("fopen");
       close(server_socket_fd);
       freeaddrinfo(servinfo);
       exit (1); // JDH exit (-1 instead?)
    }
+   syslog(LOG_INFO,"+++ outfile_writing passed +++");
 
 
    // only exit this loop if SIGINT or SIGTERM received
@@ -150,6 +157,7 @@ int main (int argc, char** argv)
    {
       // printf("gibberish\n");
       // sleep(1);
+      syslog(LOG_INFO,"+++ inside while(keep_listening) +++");
  
       // listen
       if ( listen (server_socket_fd, 1) == -1)	// backlog set to 1 pending allowed
@@ -159,6 +167,7 @@ int main (int argc, char** argv)
          freeaddrinfo(servinfo);
          exit (1); // JDH exit (-1 instead?)
       }
+      syslog(LOG_INFO,"+++ listen() passed +++");
 
       // accept - blocks here waiting on a connection
       struct sockaddr_storage received_addr;
@@ -167,11 +176,13 @@ int main (int argc, char** argv)
       client_socket_fd = accept(server_socket_fd, (struct sockaddr *)&received_addr, &received_addr_size); // JDH arg guesses
       if (client_socket_fd == -1)
       {
+         syslog(LOG_INFO,"+++ accept() error +++");
          perror("accept");
          close(server_socket_fd);
          freeaddrinfo(servinfo);
          exit (1); // JDH exit (-1 instead?)
       }
+      syslog(LOG_INFO,"+++ accept() passed +++");
 
       // do something
       void *address;
@@ -183,7 +194,6 @@ int main (int argc, char** argv)
       // JDH SUN FILE *outfile; // /var/tmp/aesdsocketdata
 
       // inet_ntop(received_addr.ss_family, address, client_ip, sizeof client_ip);
-      printf("Accepted connection from %d\n", client_port);
       syslog(LOG_INFO,"Accepted connection from %d", client_port);
   
 
@@ -208,15 +218,20 @@ int main (int argc, char** argv)
          int bytes_read = read(client_socket_fd, buffer, BUFFER_SIZE-1);
          if (bytes_read <= 0)
          {
+            syslog(LOG_INFO,"+++ read 0 or less bytes+++");
             printf("--> read 0 or less bytes");
             break;
          }
+      printf("Accepted connection from %d\n", client_port);
+         syslog(LOG_INFO,"+++ read %d bytes+++", bytes_read);
+	 printf("######### read %d bytes ############\n", bytes_read); // JDH DEBUG
          buffer[bytes_read] = '\0'; // null terminate
          fwrite(buffer, 1, bytes_read, outfile_writing);
 	 fflush(outfile_writing); // JDH SUN make sure the data goes to disk
 
          if (strchr(buffer, '\n') != NULL)
          {
+            syslog(LOG_INFO,"+++ found <cr> +++");
             printf("--> found <cr>");
 	    cr = 1;
          }
@@ -225,6 +240,7 @@ int main (int argc, char** argv)
          outfile_reading = fopen ("/var/tmp/aesdsocketdata", "r"); // JDHJDH open for read
          if (!outfile_reading)
          { 
+            syslog(LOG_INFO,"+++ outfile_read fopen error +++");
             perror("fopen for sending");
             close(server_socket_fd);
             freeaddrinfo(servinfo);
@@ -232,13 +248,34 @@ int main (int argc, char** argv)
          }
 
          // send
-         printf ("--> going to send !%s!\n", buffer);
+         // JDH SUN : printf ("------> going to send !%s!\n", buffer);
+	 /* JDH MON
          while ((still_sending = fread(buffer, 1, BUFFER_SIZE, outfile_reading)) > 0)
          {
-            printf ("--> write() still_sending %d", still_sending);
+            syslog(LOG_INFO,"+++ going to send !%s!", buffer);
+            syslog(LOG_INFO,"+++ write() still_sending %d", still_sending);
             write(client_socket_fd, buffer, still_sending);
          }
-         printf ("--> after write()");
+	 */
+         // JDH MON begin
+         while ((still_sending = fread(buffer, 1, BUFFER_SIZE, outfile_reading)) > 0)
+	 {
+	    size_t total = 0;
+	    while (total < still_sending)
+	    {
+               ssize_t n = write(client_socket_fd, buffer + total, still_sending - total);
+	       if (n < 0)
+	       {
+                  syslog(LOG_INFO,"+++ write() error %d", (int)n);
+	          break;
+	       }
+	       total += n;
+	    }
+            syslog(LOG_INFO,"+++ write() success sent %zu bytes", total);
+         }
+	 // JDH MON end
+         syslog(LOG_INFO,"+++ after write()");
+         printf ("------> after write()\n");
          fclose(outfile_reading);
       } // huh?
    }
