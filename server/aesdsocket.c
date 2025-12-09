@@ -1,4 +1,4 @@
-// JDH new file
+// JDH new file : 
 #include <stdio.h>
 #include <stdlib.h>	// for exit()
 #include <syslog.h>	// for logging
