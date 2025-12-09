@@ -76,7 +76,7 @@ int main (int argc, char** argv)
 {
    int run_as_daemon = 0;
 
-   printf("ECEA 5305\n");
+   //printf("ECEA 5305\n");
    syslog(LOG_INFO, "ECEA 5305");	// JDH feedback 
 
    for (int i=1; i<argc; i++)
@@ -132,9 +132,9 @@ int main (int argc, char** argv)
 
    // we could bind, so now potentially run as daemon
    if (run_as_daemon) {
-      printf ("\n+++ before make_daemon() +++\n");
+      //printf ("\n+++ before make_daemon() +++\n");
       make_daemon(); // JDH make sure we don't "double connect" on 9000
-      printf ("\n+++ after make_daemon() +++\n");
+      //printf ("\n+++ after make_daemon() +++\n");
    }
 
    // open a file, truncating if it exists
@@ -219,12 +219,12 @@ int main (int argc, char** argv)
          if (bytes_read <= 0)
          {
             syslog(LOG_INFO,"+++ read 0 or less bytes+++");
-            printf("--> read 0 or less bytes");
+            //printf("--> read 0 or less bytes");
             break;
          }
-      printf("Accepted connection from %d\n", client_port);
+         //printf("Accepted connection from %d\n", client_port);
          syslog(LOG_INFO,"+++ read %d bytes+++", bytes_read);
-	 printf("######### read %d bytes ############\n", bytes_read); // JDH DEBUG
+	 //printf("######### read %d bytes ############\n", bytes_read); // JDH DEBUG
          buffer[bytes_read] = '\0'; // null terminate
          fwrite(buffer, 1, bytes_read, outfile_writing);
 	 fflush(outfile_writing); // JDH SUN make sure the data goes to disk
@@ -232,7 +232,7 @@ int main (int argc, char** argv)
          if (strchr(buffer, '\n') != NULL)
          {
             syslog(LOG_INFO,"+++ found <cr> +++");
-            printf("--> found <cr>");
+            //printf("--> found <cr>");
 	    cr = 1;
          }
          // JDH SUN fclose(outfile); // to make sure all is written to disk
@@ -275,7 +275,7 @@ int main (int argc, char** argv)
          }
 	 // JDH MON end
          syslog(LOG_INFO,"+++ after write()");
-         printf ("------> after write()\n");
+         //printf ("------> after write()\n");
          fclose(outfile_reading);
       } // huh?
    }
