@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # JDH added Assignment 5 Part 2
 
 case "$1" in
